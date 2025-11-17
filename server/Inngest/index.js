@@ -14,7 +14,7 @@ const syncUserCreation = inngest.createFunction(
   async ({ event }) => {
     const { id, first_name, last_name, image_url, email_addresses } =
       event.data;
-    let username = email_addresses[0].email_addresses.split("@")[0];
+    let username = email_addresses[0].email_address.split("@")[0];
 
     // Check Availability of username
 
@@ -25,7 +25,7 @@ const syncUserCreation = inngest.createFunction(
 
     const userData = {
       _id: id,
-      email: email_addresses[0].email_addresses,
+      email: email_addresses[0].email_address,
       full_name: first_name + " " + last_name,
       profile_picture: image_url,
       username,
@@ -45,7 +45,7 @@ const syncUserUpdation = inngest.createFunction(
       event.data;
 
     const updatedUserData = {
-      email: email_addresses[0].email_addresses,
+      email: email_addresses[0].email_address,
       full_name: first_name + " " + last_name,
       profile_picture: image_url,
     };
@@ -64,7 +64,6 @@ const syncUserDeletiion = inngest.createFunction(
     await User.findByIdAndDelete(id);
   }
 );
-
 // Create an empty array where we'll export future Inngest functions
 export const functions = [
   syncUserCreation,
