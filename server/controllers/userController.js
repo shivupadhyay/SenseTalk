@@ -1,4 +1,4 @@
-import imagekit from "../config/imagekit.js";
+import imagekit from "../config/imageKit.js";
 import User from "../models/User.js";
 import fs from "fs";
 
@@ -22,7 +22,7 @@ export const getUserData = async (req, res) => {
 export const updateUserData = async (req, res) => {
   try {
     const { userId } = req.auth();
-    const { username, bio, location, full_name } = req.body;
+    let { username, bio, location, full_name } = req.body;
     const tempUser = await User.findById(userId);
 
     !username && (username = tempUser.username);
@@ -57,7 +57,7 @@ export const updateUserData = async (req, res) => {
           { width: "512" },
         ],
       });
-      updateUserData.profile_picture = url;
+      updatedData.profile_picture = url;
     }
     // Cover Photo
     if (cover) {
@@ -74,7 +74,7 @@ export const updateUserData = async (req, res) => {
           { width: "1280" },
         ],
       });
-      updateUserData.cover_photo = url;
+      updatedData.cover_photo = url;
     }
     const user = await User.findByIdAndUpdate(userId, updatedData, {
       new: true,
@@ -162,3 +162,7 @@ export const UnfollowUser = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
+// Send Connection request
+
+
