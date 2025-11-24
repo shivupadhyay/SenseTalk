@@ -12,7 +12,6 @@ import {
 } from "../controllers/userController.js";
 import { protect } from "../middlewares/auth.js";
 import { upload } from "../config/multer.js";
-import { Profiler } from "react";
 
 const userRouter = express.Router();
 
@@ -32,6 +31,6 @@ userRouter.post("/unfollow", protect, UnfollowUser);
 userRouter.post("/connect", protect, sendConnectionRequest);
 userRouter.post("/accept", protect, acceptConnectionRequest);
 userRouter.get("/connenctions", protect, getUserConnection);
-userRouter.get("/profiles", getUserProfiles);
+userRouter.post("/profiles",protect, getUserProfiles);
 
 export default userRouter;
