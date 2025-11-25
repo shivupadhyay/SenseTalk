@@ -30,7 +30,7 @@ userRouter.post("/follow", protect, FollowUser);
 userRouter.post("/unfollow", protect, UnfollowUser);
 userRouter.post("/connect", protect, sendConnectionRequest);
 userRouter.post("/accept", protect, acceptConnectionRequest);
-userRouter.get("/connenctions", protect, getUserConnection);
+userRouter.get("/connections", protect, getUserConnection);
 userRouter.post("/profiles",protect, getUserProfiles);
 
 export default userRouter;
