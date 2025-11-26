@@ -84,7 +84,7 @@ export const sendMessage = async (req, res) => {
 
 // Get Chat Messages
 
-export const getChatMessages = async () => {
+export const getChatMessages = async (req,res) => {
   try {
     const { userId } = req.auth();
     const { to_user_id } = req.body;
