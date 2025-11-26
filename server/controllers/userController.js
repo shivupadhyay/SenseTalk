@@ -241,7 +241,7 @@ export const getUserConnection = async (req, res) => {
     const followers = user.followers;
     const following = user.following;
 
-    const pendingConnection = (
+    const pendingConnections = (
       await Connection.find({
         to_user_id: userId,
         status: "pending",
@@ -252,7 +252,7 @@ export const getUserConnection = async (req, res) => {
       connections,
       followers,
       following,
-      pendingConnection,
+      pendingConnections,
     });
   } catch (error) {
     console.log(error);
@@ -272,7 +272,7 @@ export const acceptConnectionRequest = async (req, res) => {
       to_user_id: userId,
     });
     if (!connection) {
-      res.json({ successfalse, message: "Connection not found" });
+      res.json({ success:false, message: "Connection not found" });
     }
     const user = await User.findById(userId);
     user.connections.push(id);
