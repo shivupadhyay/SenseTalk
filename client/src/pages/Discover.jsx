@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { dummyConnectionsData } from "../assets/assets";
 import { Search } from "lucide-react";
-import UserCard from "../components/Usercard";
+import UserCard from "../components/UserCard";
 import Loading from "../components/Loading";
 import api from "../api/axios";
 import { useAuth } from "@clerk/clerk-react";
