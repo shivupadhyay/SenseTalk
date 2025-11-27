@@ -21,6 +21,7 @@ const StoryModel = ({ setShowModal, fetchStories }) => {
   const { getToken } = useAuth();
   const MAX_VIDEO_DURATION = 60;
   const MAX_VIDEO_SIZE_MB = 50;
+
   const handleMediaUpload = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -31,8 +32,11 @@ const StoryModel = ({ setShowModal, fetchStories }) => {
           setPreviewUrl(null);
           return;
         }
+        
         const video = document.createElement("video");
         video.preload = "metadata";
+        const blobUrl = URL.createObjectURL(file);
+
         video.onloadedmetadata = () => {
           window.URL.revokeObjectURL(video.src);
           if (video.duration > MAX_VIDEO_DURATION) {
@@ -41,7 +45,7 @@ const StoryModel = ({ setShowModal, fetchStories }) => {
             setPreviewUrl(null);
           } else {
             setMedia(file);
-            setPreviewUrl(URL.createObjectURL(file));
+            setPreviewUrl(blobUrl);
             setText("");
             setMode("media");
           }
@@ -49,7 +53,7 @@ const StoryModel = ({ setShowModal, fetchStories }) => {
         video.src = URL.createObjectURL(file);
       } else if (file.type.startsWith("image")) {
         setMedia(file);
-        setPreviewUrl(URL.createObjectURL(file));
+        setPreviewUrl(blobUrl);
         setText("");
         setMode("media");
       }
