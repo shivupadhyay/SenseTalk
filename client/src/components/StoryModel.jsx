@@ -70,7 +70,7 @@ const StoryModel = ({ setShowModal, fetchStories }) => {
     formData.append("content", text);
     formData.append("media_type", media_type);
     formData.append("media", media);
-    formData.append("background_color", background)
+    formData.append("background_color", background);
     const token = await getToken();
     try {
       const { data } = await api.post("/api/story/create", formData, {
@@ -121,7 +121,14 @@ const StoryModel = ({ setShowModal, fetchStories }) => {
                 className="object-contain max-h-full"
               />
             ) : (
-              <video src={previewUrl} className="object-contain max-h-full" />
+              <video
+                src={previewUrl}
+                className="object-contain max-h-full"
+                controls
+                autoPlay
+                muted
+                playsInline
+              />
             ))}
         </div>
         <div className="flex mt-4 gap-2">
