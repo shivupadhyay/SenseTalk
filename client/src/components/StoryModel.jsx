@@ -74,7 +74,7 @@ const StoryModel = ({ setShowModal, fetchStories }) => {
     const token = await getToken();
     try {
       const { data } = await api.post("/api/story/create", formData, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}`,"Content-Type": "multipart/form-data", },
       });
       if (data.success) {
         setShowModal(false);
