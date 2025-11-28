@@ -145,7 +145,7 @@ const PostCard = ({ post, onDelete }) => {
                   onClick={handleDelete}
                   className=" flex items-center gap-2 w-full px-3 py-2
     text-white font-medium rounded-lg
-    bg-gradient-to-r from-red-500 to-orange-500
+    bg-gradient-to-r from-red-600 to-red-800
     hover:opacity-90 active:scale-95
     transition-all duration-200 border-none cursor-pointer"
                 >
