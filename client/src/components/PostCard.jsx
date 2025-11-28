@@ -1,5 +1,12 @@
-import React, { useState } from "react";
-import { BadgeCheck, Heart, MessageCircle, Share2 } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  BadgeCheck,
+  Heart,
+  MessageCircle,
+  MoreVertical,
+  Share2,
+  Trash2,
+} from "lucide-react";
 import moment from "moment";
 import { dummyUserData } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
@@ -8,14 +15,28 @@ import { useAuth } from "@clerk/clerk-react";
 import api from "../api/axios";
 import toast from "react-hot-toast";
 
-const PostCard = ({ post }) => {
+const PostCard = ({ post, onDelete }) => {
   const postWithHashTags = post.content.replace(
     /(#\w+)/g,
     '<span class="text-indigo-600">$1</span>'
   );
   const [likes, setLikes] = useState(post.likes_count);
+  const [openMenu, setOpenMenu] = useState(false);
   const currentUser = useSelector((state) => state.user.value);
   const { getToken } = useAuth();
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutSide(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpenMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutSide);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutSide);
+    };
+  }, [dropdownRef]);
   const handleLike = async () => {
     try {
       const { data } = await api.post(
@@ -41,30 +62,82 @@ const PostCard = ({ post }) => {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      const token = await getToken();
+      const { data } = await api.post(
+        "/api/post/delete",
+        { postId: post._id },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (data.success) {
+        toast.success("Post deleted.");
+        onDelete(post._id);
+        setOpenMenu(false);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   const navigate = useNavigate();
 
   return (
     <div className="bg-white rounded-xl shadow p-4 space-y-4 w-full max-w-2xl">
       {/* User Info */}
-      <div
-        onClick={() => navigate("/profile/" + post.user._id)}
-        className="inline-flex items-center gap-3 cursor-pointer"
-      >
-        <img
-          src={post.user.profile_picture}
-          alt=""
-          className="w-10 h-10 rounded-full shadow"
-        />
-        <div>
-          <div className="flex items-center space-x-1">
-            <span>{post.user.full_name}</span>
-            <BadgeCheck className="w-4 h-4 text-blue-500" />
-          </div>
-          <div className="text-gray-500 text-sm">
-            @{post.user.username} . {moment(post.createdAt).fromNow()}
+      <div className="flex justify-between items-start">
+        <div
+          onClick={() => navigate("/profile/" + post.user._id)}
+          className="inline-flex items-center gap-3 cursor-pointer"
+        >
+          <img
+            src={post.user.profile_picture}
+            alt=""
+            className="w-10 h-10 rounded-full shadow"
+          />
+          <div>
+            <div className="flex items-center space-x-1">
+              <span>{post.user.full_name}</span>
+              <BadgeCheck className="w-4 h-4 text-blue-500" />
+            </div>
+            <div className="text-gray-500 text-sm">
+              @{post.user.username} . {moment(post.createdAt).fromNow()}
+            </div>
           </div>
         </div>
+        {post.user._id === currentUser._id && (
+          <div className="relative">
+            <MoreVertical
+              className="w-5 h-5 text-gray-600 cursor-pointer"
+              onClick={() => setOpenMenu(!openMenu)}
+            />
+
+            {openMenu && (
+              <div
+                ref={dropdownRef}
+                className="absolute right-0 top-6  bg-white/50 backdrop-blur-md shadow-lg rounded-xl w-40 z-50 p-2"
+              >
+                <button
+                  onClick={handleDelete}
+                  className=" flex items-center gap-2 w-full px-3 py-2
+    text-white font-medium rounded-lg
+    bg-gradient-to-r from-red-500 to-orange-500
+    hover:opacity-90 active:scale-95
+    transition-all duration-200 border-none cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete Post
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
       {/* Content */}
       {post.content && (
         <div

@@ -14,10 +14,12 @@ import { fetchConnections } from "../features/connections/connectionSlice";
 import api from "../api/axios";
 import { toast } from "react-hot-toast";
 
+
 const Connections = () => {
   const navigate = useNavigate();
   const { getToken } = useAuth();
   const dispatch = useDispatch();
+  const [acceptLoading, setAcceptLoading] = useState({});
   const { connections, pendingConnections, followers, following } = useSelector(
     (state) => state.connections
   );
@@ -50,6 +52,11 @@ const Connections = () => {
   };
 
   const acceptConnection = async (userId) => {
+    if (acceptLoading[userId]) return;
+    setAcceptLoading((prev) => ({
+      ...prev,
+      [userId]: true,
+    }));
     try {
       const { data } = await api.post(
         "/api/user/accept",
@@ -66,6 +73,8 @@ const Connections = () => {
       }
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setAcceptLoading((prev) => ({ ...prev, [userId]: false }));
     }
   };
 
@@ -165,9 +174,10 @@ const Connections = () => {
                     {currentTab === "Pending" && (
                       <button
                         onClick={() => acceptConnection(user._id)}
+                        disabled={acceptConnection[user._id]}
                         className="w-full p-2 text-sm rounded bg-slate-100 hover:bg-slate-200 text-black active:scale-95 transition cursor-pointer "
                       >
-                        Accept
+                        {acceptConnection[user._id] ? "Accepting" : "Accept"}
                       </button>
                     )}
 
