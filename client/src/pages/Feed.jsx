@@ -37,6 +37,14 @@ const Feed = () => {
     setFeeds((prev) => prev.filter((p) => p._id !== postId));
   };
 
+  const handleLikeUpdate = (postId, updatedLikes) => {
+  setFeeds((prev) =>
+    prev.map((p) =>
+      p._id === postId ? { ...p, likes_count: updatedLikes } : p
+    )
+  );
+};
+
   return !loading ? (
     <div className="h-full overflow-y-scroll no-scrollbar py-10 xl:pr-5 flex items-start justify-center xl:gap-8">
       {/* Stories and post list */}
@@ -44,7 +52,7 @@ const Feed = () => {
         <StoriesBar />
         <div className="p-4 space-y-6">
           {feeds.map((post) => (
-            <PostCard key={post._id} post={post} onDelete={handleDeleteFeed} />
+            <PostCard key={post._id} post={post} onDelete={handleDeleteFeed} onLikeUpdate={handleLikeUpdate} />
           ))}
         </div>
       </div>

@@ -22,6 +22,7 @@ const PostCard = ({ post, onDelete }) => {
   );
   const [likes, setLikes] = useState(post.likes_count);
   const [openMenu, setOpenMenu] = useState(false);
+  const [showBigHeart, setShowBigheart] = useState(false);
   const currentUser = useSelector((state) => state.user.value);
   const { getToken } = useAuth();
   const dropdownRef = useRef(null);
@@ -37,6 +38,7 @@ const PostCard = ({ post, onDelete }) => {
       document.removeEventListener("mousedown", handleClickOutSide);
     };
   }, [dropdownRef]);
+
   const handleLike = async () => {
     try {
       const { data } = await api.post(
@@ -60,6 +62,14 @@ const PostCard = ({ post, onDelete }) => {
     } catch (error) {
       toast.error(error.message);
     }
+  };
+
+  const handleDoubleTap = () => {
+    handleLike();
+    setShowBigheart(true);
+    setTimeout(() => {
+      setShowBigheart(false);
+    }, 700);
   };
 
   const handleDelete = async () => {
@@ -87,7 +97,17 @@ const PostCard = ({ post, onDelete }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-white rounded-xl shadow p-4 space-y-4 w-full max-w-2xl">
+    <div
+      className="relative bg-white rounded-xl shadow p-4 space-y-4 w-full max-w-2xl"
+      onDoubleClick={handleDoubleTap}
+    >
+      {/* Single Big Heart Animation */}
+      {showBigHeart && (
+        <Heart
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
+                     text-red-500 fill-red-500 w-24 h-24 animate-pingHeart pointer-events-none z-50"
+        />
+      )}
       {/* User Info */}
       <div className="flex justify-between items-start">
         <div
@@ -141,13 +161,13 @@ const PostCard = ({ post, onDelete }) => {
       {/* Content */}
       {post.content && (
         <div
-          className="text-gray-800 text-sm whitespace-pre-line"
+          className="relative text-gray-800 text-sm whitespace-pre-line"
           dangerouslySetInnerHTML={{ __html: postWithHashTags }}
         />
       )}
 
       {/* Images */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="relative grid grid-cols-2 gap-2 select-none">
         {post.image_urls.map((img, index) => (
           <img
             src={img}
