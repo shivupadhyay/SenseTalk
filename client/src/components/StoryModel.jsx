@@ -32,10 +32,9 @@ const StoryModel = ({ setShowModal, fetchStories }) => {
           setPreviewUrl(null);
           return;
         }
-        
+
         const video = document.createElement("video");
         video.preload = "metadata";
-        const blobUrl = URL.createObjectURL(file);
 
         video.onloadedmetadata = () => {
           window.URL.revokeObjectURL(video.src);
@@ -45,7 +44,7 @@ const StoryModel = ({ setShowModal, fetchStories }) => {
             setPreviewUrl(null);
           } else {
             setMedia(file);
-            setPreviewUrl(blobUrl);
+            setPreviewUrl(URL.createObjectURL(file));
             setText("");
             setMode("media");
           }
@@ -53,7 +52,7 @@ const StoryModel = ({ setShowModal, fetchStories }) => {
         video.src = URL.createObjectURL(file);
       } else if (file.type.startsWith("image")) {
         setMedia(file);
-        setPreviewUrl(blobUrl);
+        setPreviewUrl(URL.createObjectURL(file));
         setText("");
         setMode("media");
       }
