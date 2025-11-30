@@ -172,10 +172,10 @@ export const deletePost = async (req, res) => {
 
 export const updatePost = async (req, res) => {
   try {
-    const { userId } = req.auth(); // Get logged-in user
+    const { userId } = req.auth();
     const { postId, content } = req.body;
 
-    // 1️⃣ Get existingImages from request body (may be string or array)
+    //  Get existingImages from request body (may be string or array)
     let existingImages = [];
     if (req.body.existingImages) {
       existingImages = Array.isArray(req.body.existingImages)
@@ -183,10 +183,10 @@ export const updatePost = async (req, res) => {
         : [req.body.existingImages];
     }
 
-    // 2️⃣ Get new uploaded images from multer
+    //  Get new uploaded images from multer
     const newImagesFiles = req.files || [];
 
-    // 3️⃣ Find the post
+    //  Find the post
     const post = await Post.findById(postId);
     if (!post) return res.json({ success: false, message: "Post not found" });
 
@@ -196,7 +196,7 @@ export const updatePost = async (req, res) => {
         message: "You cannot edit someone else's post",
       });
 
-    // 4️⃣ Upload new images to ImageKit
+    //  Upload new images to ImageKit
     let newImageUrls = [];
     if (newImagesFiles.length) {
       newImageUrls = await Promise.all(
@@ -220,10 +220,10 @@ export const updatePost = async (req, res) => {
       );
     }
 
-    // 5️⃣ Merge existing + new images
+    //  Merge existing + new images
     const finalImages = [...existingImages, ...newImageUrls];
 
-    // 6️⃣ Update post content, images, and type
+    //  Update post content, images, and type
     post.content = content;
     post.image_urls = finalImages;
     post.post_type =

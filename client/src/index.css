@@ -43,3 +43,18 @@
 .animate-dropdown {
   animation: dropdownPop 0.18s ease-out forwards;
 }
+
+@keyframes floatUp {
+  0% {
+    opacity: 0;
+    transform: translateY(15px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+  }
+}
+
+.animate-floatUp {
+  animation: floatUp 0.25s ease-out forwards;
+}

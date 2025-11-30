@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   BadgeCheck,
   Heart,
+  ImageIcon,
   MessageCircle,
   MoreVertical,
   Pencil,
@@ -334,12 +335,14 @@ const PostCard = ({ post, onDelete, fetchFeeds }) => {
 
       {/* ------------------ CONTENT ------------------ */}
       {isEditing ? (
-        <textarea
-          className="w-full p-2 border rounded"
-          rows={3}
-          value={caption}
-          onChange={(e) => setCaption(e.target.value)}
-        />
+        <div className="p-[2px] rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 animate-floatUp">
+          <textarea
+            className="w-full p-3 rounded-lg bg-white focus:outline-none"
+            rows={3}
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+          />
+        </div>
       ) : (
         caption && (
           <div
@@ -391,13 +394,19 @@ const PostCard = ({ post, onDelete, fetchFeeds }) => {
       </div>
 
       {isEditing && (
-        <input
-          type="file"
-          multiple
-          accept="image/*"
-          className="mt-2"
-          onChange={handleNewImages}
-        />
+        <div className="mt-4">
+          <label className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-md cursor-pointer hover:bg-blue-600 transition-colors">
+            <ImageIcon className="w-5 h-5" />
+            <span>Choose Files</span>
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              hidden
+              onChange={handleNewImages}
+            />
+          </label>
+        </div>
       )}
 
       {/* ------------------ ACTIONS ------------------ */}
