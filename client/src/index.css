@@ -22,6 +22,24 @@
   }
 }
 
+
 .animate-pingHeart {
   animation: pingHeart 0.7s ease-out forwards;
+}
+
+@keyframes dropdownPop {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+    filter: blur(0px);
+  }
+}
+
+.animate-dropdown {
+  animation: dropdownPop 0.18s ease-out forwards;
 }

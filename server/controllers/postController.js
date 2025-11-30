@@ -136,7 +136,6 @@ export const likePost = async (req, res) => {
   }
 };
 
-
 // Delete Post
 
 export const deletePost = async (req, res) => {
@@ -165,6 +164,84 @@ export const deletePost = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    return res.json({ success: false, message: error.message });
+  }
+};
+
+// Update the post
+
+export const updatePost = async (req, res) => {
+  try {
+    const { userId } = req.auth(); // Get logged-in user
+    const { postId, content } = req.body;
+
+    // 1️⃣ Get existingImages from request body (may be string or array)
+    let existingImages = [];
+    if (req.body.existingImages) {
+      existingImages = Array.isArray(req.body.existingImages)
+        ? req.body.existingImages
+        : [req.body.existingImages];
+    }
+
+    // 2️⃣ Get new uploaded images from multer
+    const newImagesFiles = req.files || [];
+
+    // 3️⃣ Find the post
+    const post = await Post.findById(postId);
+    if (!post) return res.json({ success: false, message: "Post not found" });
+
+    if (post.user.toString() !== userId)
+      return res.json({
+        success: false,
+        message: "You cannot edit someone else's post",
+      });
+
+    // 4️⃣ Upload new images to ImageKit
+    let newImageUrls = [];
+    if (newImagesFiles.length) {
+      newImageUrls = await Promise.all(
+        newImagesFiles.map(async (image) => {
+          const fileBuffer = fs.readFileSync(image.path);
+          const response = await imagekit.upload({
+            file: fileBuffer,
+            fileName: image.originalname,
+            folder: "posts",
+          });
+          const url = imagekit.url({
+            path: response.filePath,
+            transformation: [
+              { quality: "auto" },
+              { format: "webp" },
+              { width: "512" },
+            ],
+          });
+          return url;
+        })
+      );
+    }
+
+    // 5️⃣ Merge existing + new images
+    const finalImages = [...existingImages, ...newImageUrls];
+
+    // 6️⃣ Update post content, images, and type
+    post.content = content;
+    post.image_urls = finalImages;
+    post.post_type =
+      finalImages.length && content
+        ? "text_with_image"
+        : finalImages.length
+        ? "image"
+        : "text";
+
+    await post.save();
+
+    return res.json({
+      success: true,
+      message: "Post updated successfully",
+      post,
+    });
+  } catch (error) {
+    console.error(error);
     return res.json({ success: false, message: error.message });
   }
 };

@@ -13,7 +13,7 @@ const Feed = () => {
   const [loading, setLoading] = useState(true);
   const { getToken } = useAuth();
 
-  const fecthFeeds = async () => {
+  const fetchFeeds = async () => {
     try {
       setLoading(true);
       const { data } = await api.get("/api/post/feed", {
@@ -30,7 +30,7 @@ const Feed = () => {
     setLoading(false);
   };
   useEffect(() => {
-    fecthFeeds();
+    fetchFeeds();
   }, []);
 
   const handleDeleteFeed = (postId) => {
@@ -38,12 +38,12 @@ const Feed = () => {
   };
 
   const handleLikeUpdate = (postId, updatedLikes) => {
-  setFeeds((prev) =>
-    prev.map((p) =>
-      p._id === postId ? { ...p, likes_count: updatedLikes } : p
-    )
-  );
-};
+    setFeeds((prev) =>
+      prev.map((p) =>
+        p._id === postId ? { ...p, likes_count: updatedLikes } : p
+      )
+    );
+  };
 
   return !loading ? (
     <div className="h-full overflow-y-scroll no-scrollbar py-10 xl:pr-5 flex items-start justify-center xl:gap-8">
@@ -52,7 +52,13 @@ const Feed = () => {
         <StoriesBar />
         <div className="p-4 space-y-6">
           {feeds.map((post) => (
-            <PostCard key={post._id} post={post} onDelete={handleDeleteFeed} onLikeUpdate={handleLikeUpdate} />
+            <PostCard
+              key={post._id}
+              post={post}
+              onDelete={handleDeleteFeed}
+              onLikeUpdate={handleLikeUpdate}
+              fetchFeeds={fetchFeeds}
+            />
           ))}
         </div>
       </div>
