@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   BadgeCheck,
+  Bookmark,
+  BookmarkCheck,
   Heart,
   ImageIcon,
   MessageCircle,
@@ -12,6 +14,7 @@ import {
 } from "lucide-react";
 import moment from "moment";
 import { dummyUserData } from "../assets/assets";
+import confetti from "canvas-confetti";
 import { Form, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useAuth } from "@clerk/clerk-react";
@@ -23,6 +26,7 @@ const PostCard = ({ post, onDelete, fetchFeeds }) => {
     /(#\w+)/g,
     '<span class="text-indigo-600">$1</span>'
   );
+  const currentUser = useSelector((state) => state.user.value);
   const [likes, setLikes] = useState(post.likes_count);
   const [openMenu, setOpenMenu] = useState(false);
   const [showBigHeart, setShowBigheart] = useState(false);
@@ -30,7 +34,10 @@ const PostCard = ({ post, onDelete, fetchFeeds }) => {
   const [caption, setCaption] = useState(post.content || "");
   const [existingImages, setExistingImages] = useState(post.image_urls || []);
   const [newImages, setNewImages] = useState([]);
-  const currentUser = useSelector((state) => state.user.value);
+  const [isSaved, setIsSaved] = useState(
+    currentUser?.saves?.includes(post._id) || false
+  );
+
   const { getToken } = useAuth();
   const dropdownRef = useRef(null);
 
@@ -133,6 +140,54 @@ const PostCard = ({ post, onDelete, fetchFeeds }) => {
         fetchFeeds();
       } else {
         toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const toogleSave = async () => {
+    try {
+      const token = await getToken();
+
+      const { data } = await api.post(
+        "/api/post/toggle-save",
+        {
+          postId: post._id,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!data.success) {
+        toast.error(data.message);
+        return;
+      }
+      setIsSaved(data.isSaved);
+      if (data.isSaved) {
+        confetti({
+          particleCount: 120,
+          spread: 70,
+          origin: { y: 0.7 },
+        });
+
+        toast.success("Saved to your collection!", {
+          style: {
+            borderRadius: "10px",
+            background: "#333",
+            color: "#fff",
+          },
+          icon: "📌",
+        });
+      } else {
+        toast("Removed from your saved posts", {
+          icon: "❌",
+          style: {
+            borderRadius: "10px",
+            background: "#222",
+            color: "white",
+          },
+        });
       }
     } catch (error) {
       toast.error(error.message);
@@ -450,6 +505,25 @@ const PostCard = ({ post, onDelete, fetchFeeds }) => {
           <div className="flex items-center gap-1">
             <Share2 className="w-4 h-4" />
             <span>{7}</span>
+          </div>
+          <div
+            onClick={toogleSave}
+            className="relative ml-auto cursor-pointer group"
+          >
+            {isSaved ? (
+              <BookmarkCheck
+                className="w-5 h-5 text-orange-500 transition-all duration-200"
+                fill="currentColor"
+                stroke="currentColor"
+                style={{ fill: "currentColor", stroke: "currentColor" }}
+              />
+            ) : (
+              <Bookmark
+                className="w-5 h-5 text-gray-600 transition-all"
+                fill="none"
+                stroke="currentColor"
+              />
+            )}
           </div>
         </div>
       )}

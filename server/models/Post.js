@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+
 const postSchema = new mongoose.Schema(
   {
     user: {
@@ -21,6 +22,12 @@ const postSchema = new mongoose.Schema(
       required: true,
     },
     likes_count: [
+      {
+        type: String,
+        ref: "User",
+      },
+    ],
+    saves: [
       {
         type: String,
         ref: "User",

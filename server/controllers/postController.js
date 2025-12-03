@@ -245,3 +245,54 @@ export const updatePost = async (req, res) => {
     return res.json({ success: false, message: error.message });
   }
 };
+
+// Toogle Save / Unsave Post
+
+export const toogleSavePost = async (req, res) => {
+  try {
+    const { userId } = req.auth;
+    const { postId } = req.body;
+
+    const post = await Post.findById(postId);
+    const user = await User.findById(userId);
+
+    if (!post || !user) {
+      return res.json({
+        success: false,
+        message: "Post or user not found.",
+      });
+    }
+    const alreadySaved = user.saved_posts?.includes(postId);
+    if (alreadySaved) {
+      // UnSave Post
+      user.saved_posts.pull(postId);
+      post.saves.pull(userId);
+
+      await post.save();
+      await user.save();
+
+      return res.json({
+        success: true,
+        isSaved: false,
+        message: "Post Unsaved",
+      });
+    } else {
+      // Save Post
+
+      user.saved_posts.push(postId);
+      post.saves.push(userId);
+
+      await post.save();
+      await user.save();
+
+      return res.json({
+        success: true,
+        isSaved: true,
+        message: "Post Saved successfully",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.json({ success: false, message: error.message });
+  }
+};

@@ -52,6 +52,12 @@ const userSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    saved_posts:[
+      {
+        type:String,
+        ref:"Post"
+      }
+    ]
   },
   {
     timestamps: true,

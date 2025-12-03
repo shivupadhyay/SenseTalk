@@ -6,6 +6,7 @@ import {
   deletePost,
   getFeedPosts,
   likePost,
+  toogleSavePost,
   updatePost,
 } from "../controllers/postController.js";
 
@@ -16,5 +17,6 @@ postRouter.get("/feed", protect, getFeedPosts);
 postRouter.post("/like", protect, likePost);
 postRouter.post("/delete", protect, deletePost);
 postRouter.put("/update", upload.array("newImages", 10), updatePost);
+postRouter.post("/toggle-save", protect, toogleSavePost);
 
 export default postRouter;
