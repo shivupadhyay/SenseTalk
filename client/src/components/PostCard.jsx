@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useDeferredValue, useEffect, useRef, useState } from "react";
 import {
   BadgeCheck,
   Bookmark,
@@ -16,10 +16,11 @@ import moment from "moment";
 import { dummyUserData } from "../assets/assets";
 import confetti from "canvas-confetti";
 import { Form, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "@clerk/clerk-react";
 import api from "../api/axios";
 import toast from "react-hot-toast";
+import { toggleSavePost } from "../features/user/userSlice";
 
 const PostCard = ({ post, onDelete, fetchFeeds }) => {
   const postWithHashTags = post.content.replace(
@@ -34,12 +35,17 @@ const PostCard = ({ post, onDelete, fetchFeeds }) => {
   const [caption, setCaption] = useState(post.content || "");
   const [existingImages, setExistingImages] = useState(post.image_urls || []);
   const [newImages, setNewImages] = useState([]);
-  const [isSaved, setIsSaved] = useState(
-    currentUser?.saves?.includes(post._id) || false
-  );
+  const savedPosts = useSelector((state) => state.user.savedPosts);
+  const isSaved = savedPosts?.includes(post._id);
 
   const { getToken } = useAuth();
   const dropdownRef = useRef(null);
+
+  const dispatch = useDispatch();
+
+  // useEffect(() => {
+  //   setIsSaved(currentUser?.saves?.includes(post._id));
+  // }, [currentUser]);
 
   useEffect(() => {
     function handleClickOutSide(e) {
@@ -146,53 +152,53 @@ const PostCard = ({ post, onDelete, fetchFeeds }) => {
     }
   };
 
-  const toogleSave = async () => {
-    try {
-      const token = await getToken();
+  // const toogleSave = async () => {
+  //   try {
+  //     const token = await getToken();
 
-      const { data } = await api.post(
-        "/api/post/toggle-save",
-        {
-          postId: post._id,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      if (!data.success) {
-        toast.error(data.message);
-        return;
-      }
-      setIsSaved(data.isSaved);
-      if (data.isSaved) {
-        confetti({
-          particleCount: 120,
-          spread: 70,
-          origin: { y: 0.7 },
-        });
+  //     const { data } = await api.post(
+  //       "/api/post/toggle-save",
+  //       {
+  //         postId: post._id,
+  //       },
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+  //     if (!data.success) {
+  //       toast.error(data.message);
+  //       return;
+  //     }
+  //     dispatch(toggleSavePost({ postId: post._id, token }));
+  //     if (data.isSaved) {
+  //       confetti({
+  //         particleCount: 120,
+  //         spread: 70,
+  //         origin: { y: 0.7 },
+  //       });
 
-        toast.success("Saved to your collection!", {
-          style: {
-            borderRadius: "10px",
-            background: "#333",
-            color: "#fff",
-          },
-          icon: "📌",
-        });
-      } else {
-        toast("Removed from your saved posts", {
-          icon: "❌",
-          style: {
-            borderRadius: "10px",
-            background: "#222",
-            color: "white",
-          },
-        });
-      }
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
+  //       toast.success("Saved to your collection!", {
+  //         style: {
+  //           borderRadius: "10px",
+  //           background: "#333",
+  //           color: "#fff",
+  //         },
+  //         icon: "📌",
+  //       });
+  //     } else {
+  //       toast("Removed from your saved posts", {
+  //         icon: "❌",
+  //         style: {
+  //           borderRadius: "10px",
+  //           background: "#222",
+  //           color: "white",
+  //         },
+  //       });
+  //     }
+  //   } catch (error) {
+  //     toast.error(error.message);
+  //   }
+  // };
 
   // return (
   //   <div
@@ -325,6 +331,45 @@ const PostCard = ({ post, onDelete, fetchFeeds }) => {
   //     </div>
   //   </div>
   // );
+const toogleSave = async () => {
+  try {
+    const token = await getToken();
+
+    // Dispatch Redux thunk (this calls the API internally)
+    const result = await dispatch(
+      toggleSavePost({ postId: post._id, token })
+    ).unwrap();
+
+    // result.saved comes from backend → data.isSaved
+    if (result.saved) {
+      confetti({
+        particleCount: 120,
+        spread: 70,
+        origin: { y: 0.7 },
+      });
+
+      toast.success("Saved to your collection!", {
+        style: {
+          borderRadius: "10px",
+          background: "#333",
+          color: "#fff",
+        },
+        icon: "📌",
+      });
+    } else {
+      toast("Removed from your saved posts", {
+        icon: "❌",
+        style: {
+          borderRadius: "10px",
+          background: "#222",
+          color: "white",
+        },
+      });
+    }
+  } catch (error) {
+    toast.error(error.message);
+  }
+};
 
   return (
     <div

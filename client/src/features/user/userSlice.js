@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 
 const initialState = {
   value: null,
+  savedPosts: [],
 };
 
 export const fetchUser = createAsyncThunk("user/fetchUser", async (token) => {
@@ -30,6 +31,18 @@ export const updateUser = createAsyncThunk(
   }
 );
 
+export const toggleSavePost = createAsyncThunk(
+  "user/toggleSavePost",
+  async ({ postId, token }) => {
+    const { data } = await api.post(
+      `/api/post/toggle-save`,
+      { postId },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return { postId, saved: data.isSaved }; // saved = true/false from backend
+  }
+);
+
 const userSlice = createSlice({
   name: "user",
   initialState,
@@ -38,9 +51,21 @@ const userSlice = createSlice({
     builder
       .addCase(fetchUser.fulfilled, (state, action) => {
         state.value = action.payload;
+        state.savedPosts = action.payload?.saved_posts || [];
       })
       .addCase(updateUser.fulfilled, (state, action) => {
         state.value = action.payload;
+      })
+      .addCase(toggleSavePost.fulfilled, (state, action) => {
+        const { postId, saved } = action.payload;
+
+        if (saved) {
+          if (!state.savedPosts.includes(postId)) {
+            state.savedPosts.push(postId);
+          }
+        } else {
+          state.savedPosts = state.savedPosts.filter((id) => id !== postId);
+        }
       });
   },
 });
