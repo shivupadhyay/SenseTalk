@@ -13,7 +13,7 @@ import { useSelector } from "react-redux";
 
 const Profile = () => {
   const currentUser = useSelector((state) => state.user.value);
-  console.log(currentUser,"Current User");
+  // console.log(currentUser,"Current User");
   const { getToken } = useAuth();
   const { profileId } = useParams();
   const [user, setUser] = useState(null);
