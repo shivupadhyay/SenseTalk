@@ -24,7 +24,12 @@ const NotificationLikes = () => {
   }, [getToken]);
   return (
     <div className="w-full min-h-screen bg-gray-100 p-4">
-      <h2 className="text-xl font-bold text-center mb-6">Notifications</h2>
+      <h2
+        className="text-3xl font-extrabold text-center mb-6 bg-clip-text text-transparent 
+bg-gradient-to-r from-indigo-500 via-pink-500 to-orange-400 drop-shadow-xl animate-pulse"
+      >
+        Notifications
+      </h2>
 
       {notifyLikes.length === 0 && (
         <div className="text-center text-gray-500 mt-20">
