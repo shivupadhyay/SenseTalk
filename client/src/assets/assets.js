@@ -5,7 +5,7 @@ import bgImage from './bgImage.png'
 import group_users from './group_users.png'
 import BGImage from './BGImage.jpg'
 import SenseTalk from './Sense_Talk_logo.svg'
-import { Home, MessageCircle, Search, UserIcon, Users } from 'lucide-react'
+import { Heart, Home, MessageCircle, Search, UserIcon, Users } from 'lucide-react'
 import sponsored_img from './sponsored_img.png'
 
 export const assets = {
@@ -25,6 +25,7 @@ export const menuItemsData = [
     { to: '/connections', label: 'Connections', Icon: Users },
     { to: '/discover', label: 'Discover', Icon: Search },
     { to: '/profile', label: 'Profile', Icon: UserIcon },
+    { to: '/notification', label: 'Notification', Icon: Heart },
 ];
 
 export const dummyUserData = {

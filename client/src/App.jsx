@@ -17,6 +17,9 @@ import { fetchUser } from "./features/user/userSlice";
 import { fetchConnections } from "./features/connections/connectionSlice";
 import { addMessage } from "./features/messages/messagesSlice";
 import Notification from "./components/Notification";
+import useNetwork from "./app/useNetwork";
+import NoInternet from "./components/NoInternet";
+import NotificationLikes from "./pages/NotificationLikes";
 
 const App = () => {
   const { user } = useUser();
@@ -24,6 +27,10 @@ const App = () => {
   const { pathname } = useLocation();
   const pathnameRef = useRef(pathname);
   const dispatch = useDispatch();
+  const isOnline = useNetwork();
+  if (!isOnline) {
+    <NoInternet />;
+  }
   useEffect(() => {
     const fetchData = async () => {
       if (user) {
@@ -70,6 +77,7 @@ const App = () => {
           <Route path="profile" element={<Profile />} />
           <Route path="profile/:profileId" element={<Profile />} />
           <Route path="create-post" element={<CreatePost />} />
+          <Route path="notification" element={<NotificationLikes />} />
         </Route>
       </Routes>
     </>
