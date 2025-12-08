@@ -167,35 +167,43 @@ const deleteStory = inngest.createFunction(
 
 const sendNotificationOfUnseenMessage = inngest.createFunction(
   { id: "send-unseen-messages-notification" },
-  { cron: "TZ=America/New_York 0 9 * * *" }, // Every day at 9 AM
+  { cron: "TZ=America/New_York 0 9 * * *" },
   async ({ step }) => {
     const messages = await Message.find({ seen: false }).populate("to_user_id");
+
     const unSeenCount = {};
-    messages.map((message) => {
-      unSeenCount[message.to_user_id._id] =
-        (unSeenCount[message.to_user_id._id] || 0) + 1;
-    });
+
+    for (const msg of messages) {
+      if (!msg.to_user_id) continue; 
+      const uid = msg.to_user_id._id;
+      unSeenCount[uid] = (unSeenCount[uid] || 0) + 1;
+    }
 
     for (const userId in unSeenCount) {
       const user = await User.findById(userId);
+      if (!user) continue; 
+
       const subject = `You have ${unSeenCount[userId]} unseen messages`;
       const body = `
-        <div style ="font-family:Arial,sans-serif;padding:20px">
-        <h2>Hi ${user.full_name},</h2>
-        <p>You have ${unSeenCount[userId]} unseen messages </p>
-        <p>Click <a href="${process.env.FRONTEND_URL}/messages" style="color: #10b981;">here</a>to view them</p>
-        <br/>
-        <p>Thanks,<br/> SenseTalk- Stay Connected</p>
+        <div style="font-family:Arial,sans-serif;padding:20px">
+          <h2>Hi ${user.full_name},</h2>
+          <p>You have ${unSeenCount[userId]} unseen messages.</p>
+          <p>Click <a href="${process.env.FRONTEND_URL}/messages" style="color:#10b981;">
+            here
+          </a> to view them</p>
+          <br/>
+          <p>Thanks,<br/>SenseTalk - Stay Connected</p>
         </div>
-
       `;
+
       await sendEmail({
         to: user.email,
         subject,
         body,
       });
     }
-    return { message: "Notification sent." };
+
+    return { message: "All unseen message notifications sent." };
   }
 );
 
