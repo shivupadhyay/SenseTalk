@@ -151,9 +151,7 @@ const sendNotificationOfUnseenMessage = inngest.createFunction(
   { id: "send-unseen-messages-notification" },
   { cron: "TZ=America/New_York 0 9 * * *" }, // Every day at 9 AM
   async ({ step }) => {
-    const messages = await Message.find({ seen: false }).populate(
-      "to_user_id "
-    );
+    const messages = await Message.find({ seen: false }).populate("to_user_id");
     const unSeenCount = {};
     messages.map((message) => {
       unSeenCount[message.to_user_id._id] =
@@ -178,8 +176,8 @@ const sendNotificationOfUnseenMessage = inngest.createFunction(
         subject,
         body,
       });
-      return { message: "Notification sent." };
     }
+    return { message: "Notification sent." };
   }
 );
 
