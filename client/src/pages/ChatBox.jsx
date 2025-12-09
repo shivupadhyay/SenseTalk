@@ -9,6 +9,7 @@ import { addMessage, resetMessages } from "../features/messages/messagesSlice";
 import { toast } from "react-hot-toast";
 import { fetchUser } from "../features/user/userSlice";
 import { fetchMessages } from "../features/messages/messagesSlice";
+import EmojiPicker from "emoji-picker-react";
 
 const ChatBox = () => {
   const { messages } = useSelector((state) => state.messages);
@@ -18,6 +19,7 @@ const ChatBox = () => {
   const [text, setText] = useState("");
   const [image, setImage] = useState(null);
   const [user, setUser] = useState(null);
+  const [showEmojiPicker, setEmojiPicker] = useState(false);
   const messagesEndRef = useRef(null);
 
   const connections = useSelector((state) => state.connections.connections);
@@ -127,11 +129,32 @@ const ChatBox = () => {
         </div>
         <div className="px-4">
           <div className="flex items-center gap-3 pl-5 p-1.5 bg-white w-full max-w-xl mx-auto border border-gray-200 shadow rounded-full mb-5">
+            <button
+              onClick={() => setEmojiPicker(!showEmojiPicker)}
+              className="text-2xl cursor-pointer"
+            >
+              😀
+            </button>
+            {showEmojiPicker && (
+              <div className="absolute bottom-20 left-1/2  -translate-x-1/2 w-full px-3 md:w-auto md:px-0 flex justify-center animate-fadeInUp z-[999]">
+                <div
+                  className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)]
+         p-3  w-full md:w-[380px] overflow-hidden epr-body"
+                >
+                  <EmojiPicker
+                    onEmojiClick={(emoji) =>
+                      setText((prev) => prev + emoji.emoji)
+                    }
+                  />
+                </div>
+              </div>
+            )}
             <input
               type="text"
               className="flex-1 outline-none text-slate-700"
               placeholder="Type a message..."
               onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+              onFocus={() => setEmojiPicker(false)}
               onChange={(e) => setText(e.target.value)}
               value={text}
             />

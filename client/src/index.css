@@ -58,3 +58,26 @@
 .animate-floatUp {
   animation: floatUp 0.25s ease-out forwards;
 }
+.epr-body::-webkit-scrollbar {
+  display: none !important;
+}
+
+.epr-body::-webkit-scrollbar {
+  display: none !important;
+}
+.epr-body {
+  scrollbar-width: none !important;
+}
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fadeInUp {
+  animation: fadeInUp 0.25s ease-out;
+}
