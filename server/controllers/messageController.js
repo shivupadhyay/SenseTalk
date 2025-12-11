@@ -1,6 +1,7 @@
 import fs from "fs";
 import imagekit from "../config/imageKit.js";
 import Message from "../models/Message.js";
+import { err } from "inngest/types";
 
 // Create an empty object to store Sever-Side Event connections
 
@@ -84,7 +85,7 @@ export const sendMessage = async (req, res) => {
 
 // Get Chat Messages
 
-export const getChatMessages = async (req,res) => {
+export const getChatMessages = async (req, res) => {
   try {
     const { userId } = req.auth();
     const { to_user_id } = req.body;
@@ -127,6 +128,63 @@ export const getUserRecentMessages = async (req, res) => {
       .sort({ created_at: -1 });
 
     res.json({ success: true, messages });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const editMessage = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const { messageId, newText } = req.body;
+
+    const message = await Message.findById(messageId);
+    if (!message) throw new Error("Message not found");
+
+    if (message.from_user_id !== userId) {
+      throw new Error("Not authorized to edit this message");
+    }
+    message.text = newText;
+    message.edited = true;
+    await message.save();
+
+    // send Updated message via SSE
+
+    if (connections[message.to_user_id]) {
+      connections[message.to_user_id].write(
+        `data:${JSON.stringify(message)}\n\n`
+      );
+    }
+    return res.json({ success: true, message });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Delete Message
+
+export const deleteMessage = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const { messageId } = req.body;
+
+    const message = await Message.findById(messageId);
+
+    if (!message) throw new Error("Message not found.");
+    if (message.from_user_id !== userId) {
+      throw new Error("Not authorized to delete this message");
+    }
+
+    message.text = "This message is deleted";
+    message.deleted = true;
+    await message.save();
+
+    if (connections[message.to_user_id]) {
+      connections[message.to_user_id].write(
+        `data:${JSON.stringify(message)}\n\n`
+      );
+    }
+    res.json({ success: true, message });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }

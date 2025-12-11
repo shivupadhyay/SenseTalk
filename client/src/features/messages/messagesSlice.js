@@ -31,6 +31,22 @@ const messagesSlice = createSlice({
     resetMessages: (state, action) => {
       state.messages = [];
     },
+    deleteMessage: (state, action) => {
+      const msgId = action.payload;
+      const msg = state.messages.find((m) => m._id === msgId);
+      if (msg) {
+        msg.deleted = true; 
+        msg.text = ""; 
+      }
+    },
+    editMessage: (state, action) => {
+      const { messageId, newText } = action.payload;
+      const msg = state.messages.find((m) => m._id === messageId);
+      if (msg) {
+        msg.text = newText;
+        msg.edited = true;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchMessages.fulfilled, (state, action) => {
@@ -41,6 +57,12 @@ const messagesSlice = createSlice({
   },
 });
 
-export const { setMessages, addMessage, resetMessages } = messagesSlice.actions;
+export const {
+  setMessages,
+  addMessage,
+  resetMessages,
+  deleteMessage,
+  editMessage,
+} = messagesSlice.actions;
 
 export default messagesSlice.reducer;
