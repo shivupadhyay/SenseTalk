@@ -132,10 +132,11 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
       </div>
       {isMyStory && (
         <div
-          className="absolute bottom-6 left-1/2 -translate-x-1/2
-                          flex items-center gap-2
-                          bg-black/60 text-white
-                          px-4 py-2 rounded-full text-sm"
+          className="fixed left-1/2 -translate-x-1/2
+             bottom-6 sm:bottom-10
+             flex items-center gap-2
+             bg-black/60 text-white
+             px-4 py-2 rounded-full text-sm"
         >
           <Eye size={16} />
           <span>{viewStory.views_count?.length || 0}</span>
