@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { dummyStoriesData } from "../assets/assets";
-import { Plus, Video, MoreVertical, Trash2 } from "lucide-react";
+import { Plus, Video, MoreVertical, Trash2, Eye } from "lucide-react";
 import moment from "moment";
 import StoryModel from "./StoryModel";
 import StoryViewer from "./StoryViewer";
@@ -56,6 +56,22 @@ const StoriesBar = () => {
       toast.error(error.message);
     }
   };
+
+  const handleViewStory = async (story) => {
+    setViewStory(story);
+    if (story.user?._id === user?.id) return;
+    try {
+      const token = await getToken();
+      await api.post(
+        `/api/story/view/${story._id}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      fetchStories();
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
   return (
     <div className="w-screen sm:w-[calc(100vw-240px)] lg:max-w-2xl no-scrollbar overflow-x-auto px-4">
       <div className="flex gap-4 pb-5">
@@ -78,9 +94,9 @@ const StoriesBar = () => {
           const isMyStory = story.user?._id === myUserId;
           return (
             <div
-              onClick={() => setViewStory(story)}
+              onClick={() => handleViewStory(story)}
               key={index}
-              className={`group relative rounded-lg shadow min-w-30 max-w-30 max-h-40 cursor-pointer transition-all duration-200 bg-gradient-to-b from-indigo-500 to-purple-600 hover:from-indigo-700 hover:to-purple-800 active:scale-95`}
+              className={`relative min-w-30 max-w-30 aspect-3/4 rounded-lg shadow cursor-pointer bg-gradient-to-b from-indigo-500 to-purple-600 hover:shadow-lg transition`}
             >
               <img
                 src={story.user.profile_picture}
@@ -114,6 +130,7 @@ const StoriesBar = () => {
                   </div>
                 </div>
               )}
+             
               <p className="absolute top-18 left-3  text-white/60 text-sm truncate max-w-24">
                 {story.content}
               </p>

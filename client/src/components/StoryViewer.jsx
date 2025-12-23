@@ -1,36 +1,59 @@
-import { BadgeCheck, X } from "lucide-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
+import { BadgeCheck, X, Eye } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import api from "../api/axios";
 
 const StoryViewer = ({ viewStory, setViewStory }) => {
   const [progress, setProgress] = useState(0);
-  useEffect(() => {
-    let timer, progressInterval;
-    if (viewStory && viewStory.media_type !== "video") {
-      setProgress(0);
-      const duration = 10000;
-      const stepTime = 100;
-      let elapsed = 0;
-      progressInterval = setInterval(() => {
-        elapsed += stepTime;
-        setProgress((elapsed / duration) * 100);
-      }, stepTime);
+  const { getToken } = useAuth();
+  const { user } = useUser();
 
-      //   Close story after duration(10sec)
-      timer = setTimeout(() => {
-        setViewStory(null);
-      }, duration);
-    }
-    return () => {
-      clearTimeout(timer);
-      clearInterval(progressInterval);
+  const isMyStory = viewStory?.user?._id === user?.id;
+
+  useEffect(() => {
+    if (!viewStory || isMyStory) return;
+
+    const markAsViewed = async () => {
+      try {
+        const token = await getToken();
+        await api.post(
+          `/api/story/view/${viewStory._id}`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      } catch (err) {
+        console.error(err);
+      }
     };
-  }, [viewStory, setViewStory]);
-  const handleClose = () => {
-    setViewStory(null);
-  };
-  if (!viewStory) {
-    return null;
-  }
+
+    markAsViewed();
+  }, [viewStory, isMyStory]);
+
+  useEffect(() => {
+    if (!viewStory || viewStory.media_type === "video") return;
+
+    setProgress(0);
+    const duration = 10000;
+    const stepTime = 100;
+    let elapsed = 0;
+
+    const interval = setInterval(() => {
+      elapsed += stepTime;
+      setProgress((elapsed / duration) * 100);
+    }, stepTime);
+
+    const timer = setTimeout(() => {
+      setViewStory(null);
+    }, duration);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timer);
+    };
+  }, [viewStory]);
+
+  if (!viewStory) return null;
+
   const renderContent = () => {
     switch (viewStory.media_type) {
       case "image":
@@ -45,13 +68,14 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
       case "video":
         return (
           <video
-            onEnded={() => setViewStory(null)}
             src={viewStory.media_url}
-            className=" max-h-screen "
-            controls
+            className="max-h-screen"
             autoPlay
+            controls
+            onEnded={() => setViewStory(null)}
           />
         );
+
       case "text":
         return (
           <div className="w-full h-full flex items-center justify-center p-8 text-white text-2xl text-center">
@@ -63,47 +87,60 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
         return null;
     }
   };
+
   return (
     <div
-      className="fixed inset-0 h-screen bg-black bg-opacity-90 z-110 flex items-center justify-center"
+      className="fixed inset-0 h-screen bg-black bg-opacity-90 z-[110] flex items-center justify-center"
       style={{
         backgroundColor:
-          viewStory.media_type === "text"
-            ? viewStory.background_color
-            : "#000000",
+          viewStory.media_type === "text" ? viewStory.background_color : "#000",
       }}
     >
       {/* Progress Bar */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gray-700">
-        <div
-          className="h-full bg-white transition-all duration-100 linear "
-          style={{ width: `${progress}%` }}
-        ></div>
-      </div>
-      {/* User Info - Top left */}
-      <div className="absolute top-4 left-4 flex items-center space-x-3 p-2 px-4 sm:p-4 sm:px-8 backdrop-blur-2xl rounded bg-black/50">
+      {viewStory.media_type !== "video" && (
+        <div className="absolute top-0 left-0 w-full h-1 bg-gray-700">
+          <div
+            className="h-full bg-white transition-all duration-100"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
+
+      {/* User Info */}
+      <div className="absolute top-4 left-4 flex items-center gap-3 px-4 py-2 bg-black/50 backdrop-blur rounded">
         <img
           src={viewStory.user?.profile_picture}
-          alt=""
-          className="size-7 sm:size-8 rounded-full object-cover border border-white"
+          className="size-8 rounded-full border border-white"
         />
-        <div className="text-white font-medium flex items-center gap-1.5">
-          <span>{viewStory.user?.full_name}</span>
-          <BadgeCheck size={18} />
+        <div className="text-white flex items-center gap-1">
+          {viewStory.user?.full_name}
+          <BadgeCheck size={16} />
         </div>
       </div>
-      {/* Close Button */}
+
+      {/* Close */}
       <button
-        onClick={handleClose}
-        className="absolute top-4 right-4  text-white text-3xl font-bold focus:outline-none"
+        onClick={() => setViewStory(null)}
+        className="absolute top-4 right-4 text-white"
       >
-        <X className="w-8 h-8 hover:scale-110 transition cursor-pointer" />
+        <X className="w-8 h-8" />
       </button>
 
-      {/* Content Wrapper */}
+      {/* Content */}
       <div className="max-w-[90vw] max-h-[90vh] flex items-center justify-center">
         {renderContent()}
       </div>
+      {isMyStory && (
+        <div
+          className="absolute bottom-6 left-1/2 -translate-x-1/2
+                          flex items-center gap-2
+                          bg-black/60 text-white
+                          px-4 py-2 rounded-full text-sm"
+        >
+          <Eye size={16} />
+          <span>{viewStory.views_count?.length || 0}</span>
+        </div>
+      )}
     </div>
   );
 };

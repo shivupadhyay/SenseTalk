@@ -88,3 +88,24 @@ export const deleteStory = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
+// View Story
+
+export const viewStory = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const { storyId } = req.params;
+
+    const story = await Story.findById(storyId);
+    if (!story) {
+      return res.json({ success: false, message: "Story not found" });
+    }
+    if (!story.views_count.includes(userId)) {
+      story.views_count.push(userId);
+      await story.save();
+    }
+    res.json({ success: true });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
