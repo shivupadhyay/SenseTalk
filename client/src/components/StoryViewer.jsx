@@ -96,9 +96,9 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
       const res = await api.get(`/api/story/viewers/${viewStory._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      setShowViewerModal(true);
       console.log("ViewersDATA", res);
       setViewers(res.data.viewers || []);
-      setShowViewerModal(true);
     } catch (error) {
       console.log(error);
     }
