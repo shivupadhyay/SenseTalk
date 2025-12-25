@@ -96,10 +96,7 @@ export const viewStory = async (req, res) => {
     const { userId } = req.auth();
     const { storyId } = req.params;
 
-    const story = await Story.findById(storyId).populate(
-      "views_counts",
-      "full_name profile_picture"
-    );
+    const story = await Story.findById(storyId);
     if (!story) {
       return res.json({ success: false, message: "Story not found" });
     }
