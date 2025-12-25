@@ -96,7 +96,13 @@ export const viewStory = async (req, res) => {
     const { userId } = req.auth();
     const { storyId } = req.params;
 
-    const story = await Story.findById(storyId);
+    const story = await Story.findByIdAndUpdate(
+      storyId,
+      {
+        $addToSet: { views_count: userId },
+      },
+      { new: true }
+    );
     if (!story) {
       return res.json({ success: false, message: "Story not found" });
     }
