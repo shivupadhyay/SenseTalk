@@ -5,6 +5,8 @@ import api from "../api/axios";
 
 const StoryViewer = ({ viewStory, setViewStory }) => {
   const [progress, setProgress] = useState(0);
+  const [viewers, setViewers] = useState([]);
+  const [showViewerModal, setShowViewerModal] = useState(false);
   const { getToken } = useAuth();
   const { user } = useUser();
 
@@ -88,6 +90,20 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
     }
   };
 
+  const fetchViewers = async () => {
+    try {
+      const token = await getToken();
+      const res = await api.get(`/api/story/viewers/${viewStory._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log("ViewersDATA", res);
+      setViewers(res.data.viewers || []);
+      setShowViewerModal(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 h-screen bg-black bg-opacity-90 z-[110] flex items-center justify-center"
@@ -132,6 +148,7 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
       </div>
       {isMyStory && (
         <div
+          onClick={fetchViewers}
           className="fixed left-1/2 -translate-x-1/2
              bottom-6 sm:bottom-10
              flex items-center gap-2
@@ -140,6 +157,52 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
         >
           <Eye size={16} />
           <span>{viewStory.views_count?.length || 0}</span>
+        </div>
+      )}
+      {showViewerModal && (
+        <div
+          className="fixed inset-0 z-[120] bg-black/60 flex justify-center"
+          onClick={() => setShowViewerModal(false)}
+        >
+          <div
+            className="absolute bottom-0 w-full sm:w-[420px] h-[55vh] bg-[#111] rounded-t-2xl p-4 animate-slideUp
+      "
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              onClick={() => setShowViewerModal(false)}
+              className="w-12 h-1 bg-gray-500 rounded-full mx-auto mb-3 cursor-pointer
+    hover:bg-gray-400"
+            />
+
+            <div className="flex items-center gap-2 text-white mb-4">
+              <Eye size={18} />
+              <span className="font-medium">Viewed by {viewers.length}</span>
+            </div>
+
+            <div className="overflow-y-auto h-[calc(55vh-90px)] space-y-4">
+              {viewers.length === 0 && (
+                <p className="text-gray-400 text-center text-sm">
+                  No views yet
+                </p>
+              )}
+
+              {viewers.map((viewer) => (
+                <div key={viewer._id} className="flex items-center gap-3">
+                  <img
+                    src={viewer.profile_picture}
+                    className="w-10 h-10 rounded-full"
+                  />
+                  <div>
+                    <p className="text-white text-sm font-medium">
+                      {viewer.full_name}
+                    </p>
+                    <p className="text-gray-400 text-xs">@{viewer.username}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>

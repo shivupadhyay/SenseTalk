@@ -96,7 +96,10 @@ export const viewStory = async (req, res) => {
     const { userId } = req.auth();
     const { storyId } = req.params;
 
-    const story = await Story.findById(storyId);
+    const story = await Story.findById(storyId).populate(
+      "views_counts",
+      "full_name profile_picture"
+    );
     if (!story) {
       return res.json({ success: false, message: "Story not found" });
     }
@@ -105,6 +108,32 @@ export const viewStory = async (req, res) => {
       await story.save();
     }
     res.json({ success: true });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Get Story Viewers
+
+export const getStoryViewers = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const { storyId } = req.params;
+
+    const story = await Story.findById(storyId).populate(
+      "views_count",
+      "full_name profile_picture username"
+    );
+    if (!story) {
+      return res.json({ success: false, message: "Story not found" });
+    }
+    if (story.user !== userId) {
+      return res.json({ success: false, message: "Unauthorized" });
+    }
+    res.json({
+      success: true,
+      viewers: story.views_count,
+    });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }
