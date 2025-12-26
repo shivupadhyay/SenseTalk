@@ -156,7 +156,9 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
              px-4 py-2 rounded-full text-sm"
         >
           <Eye size={16} />
-          <span>{viewStory.views_count?.length || 0}</span>
+          <span>
+            {viewStory.views_count?.length || 0} <span>views</span>
+          </span>
         </div>
       )}
       {showViewerModal && (
@@ -177,7 +179,7 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
 
             <div className="flex items-center gap-2 text-white mb-4">
               <Eye size={18} />
-              <span className="font-medium">Viewed by {viewers.length}</span>
+              <span className="font-medium">{viewers.length} views</span>
             </div>
 
             <div className="overflow-y-auto h-[calc(55vh-90px)] space-y-4">
