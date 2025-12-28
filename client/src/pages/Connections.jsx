@@ -14,7 +14,6 @@ import { fetchConnections } from "../features/connections/connectionSlice";
 import api from "../api/axios";
 import { toast } from "react-hot-toast";
 
-
 const Connections = () => {
   const navigate = useNavigate();
   const { getToken } = useAuth();
@@ -85,116 +84,131 @@ const Connections = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="max-w-6xl mx-auto p-6">
-        {/* Title */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+      <div className="max-w-7xl mx-auto px-6 py-10">
+        {/* Header */}
+        <div className="mb-10">
+          <h1 className="text-4xl font-bold tracking-tight text-slate-900">
             Connections
           </h1>
-          <p className="text-slate-600">
-            Manage your network and discover new connections
+          <p className="text-slate-500 mt-2">
+            Manage followers, requests, and conversations
           </p>
         </div>
 
-        {/* Counts */}
-        <div className="mb-8 flex flex-wrap gap-6">
-          {dataArray.map((item, index) => (
+        {/* Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-5 mb-10">
+          {dataArray.map((item) => (
             <div
-              key={index}
-              className="flex flex-col items-center justify-center gap-1 border h-20 w-40 border-gray-200 bg-white shadow rounded-md"
+              key={item.label}
+              className="relative p-5 rounded-xl bg-white/80 backdrop-blur border border-slate-200 shadow-sm hover:shadow-md transition"
             >
-              <b>{item.value.length}</b>
-              <p className="text-slate-600">{item.label}</p>
+              <item.icon className="absolute right-4 top-4 w-6 h-6 text-slate-400" />
+              <p className="text-3xl font-bold text-slate-900">
+                {item.value.length}
+              </p>
+              <p className="text-sm text-slate-500 mt-1">{item.label}</p>
             </div>
           ))}
         </div>
 
         {/* Tabs */}
-        <div className="inline-flex flex-wrap items-center border border-gray-200 rounded-md p-1 bg-white shadow-sm">
+        <div className="sticky top-4 z-10 inline-flex gap-1 p-1 rounded-xl bg-white/80 backdrop-blur border border-slate-200 shadow-sm">
           {dataArray.map((tab) => (
             <button
-              onClick={() => setCurrentTab(tab.label)}
               key={tab.label}
-              className={`cursor-pointer flex items-center px-3 py-1 text-sm rounded-md transition-colors ${
+              onClick={() => setCurrentTab(tab.label)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+              ${
                 currentTab === tab.label
-                  ? "bg-white font-medium text-black"
-                  : "text-gray-500 hover: text-black"
+                  ? "bg-slate-900 text-white shadow"
+                  : "text-slate-500 hover:bg-slate-100"
               }`}
             >
-              {" "}
               <tab.icon className="w-4 h-4" />
-              <span className="ml-1">{tab.label}</span>
-              {tab.count !== undefined && (
-                <span className="ml-2 text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
-                  {tab.count}
-                </span>
-              )}
+              {tab.label}
+              <span className="text-xs opacity-70">{tab.value.length}</span>
             </button>
           ))}
         </div>
 
-        {/* connections */}
-        <div className="flex flex-wrap gap-6 mt-6">
+        {/* Users List */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
           {dataArray
             .find((item) => item.label === currentTab)
-            .value.map((user) => (
+            ?.value.map((user) => (
               <div
                 key={user._id}
-                className="w-full max-w-88 flex gap-5 p-6 bg-white shadow rounded-md "
+                className="group p-6 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-lg transition"
               >
-                <img
-                  src={user.profile_picture}
-                  alt=""
-                  className="rounded-full w-12 h-12 shadow-md mx-auto"
-                />
-                <div className="flex-1">
-                  <p className="font-medium text-slate-700">{user.full_name}</p>
-                  <p className="text-slate-500">@{user.username}</p>
-                  <p className="text-sm text-gray-600">
-                    {user.bio.slice(0, 30)}...
-                  </p>
-                  <div className="flex max-sm:flex-col gap-2 mt-4">
-                    {
-                      <button
-                        onClick={() => navigate(`/profile/${user._id}`)}
-                        className="w-full p-2 text-sm rounded bg-gradient-to-r from-indigo-500 to-purple-600 hover: from-indigo-600 hover:to-purple-700 active:scale-95 transition text-white cursor-pointer"
-                      >
-                        View Profile
-                      </button>
-                    }
-                    {currentTab === "Following" && (
-                      <button
-                        onClick={() => handleUnfollow(user._id)}
-                        className="w-full p-2 text-sm rounded bg-slate-100 hover:bg-slate-200 text-black active:scale-95 transition cursor-pointer "
-                      >
-                        Unfollow
-                      </button>
-                    )}
-                    {currentTab === "Pending" && (
-                      <button
-                        onClick={() => acceptConnection(user._id)}
-                        disabled={acceptConnection[user._id]}
-                        className="w-full p-2 text-sm rounded bg-slate-100 hover:bg-slate-200 text-black active:scale-95 transition cursor-pointer "
-                      >
-                        {acceptConnection[user._id] ? "Accepting" : "Accept"}
-                      </button>
-                    )}
-
-                    {currentTab === "Connections" && (
-                      <button
-                        onClick={() => navigate(`/messages/${user._id}`)}
-                        className="w-full p-2 text-sm rounded bg-slate-100 hover:bg-slate-200 text-slate-800 active:scale-95 transition cursor-pointer flex items-center justify-center gap-1"
-                      >
-                        <MessageSquare className="w-4 h-4" />
-                        Message
-                      </button>
-                    )}
+                <div className="flex items-center gap-4">
+                  <img
+                    src={user.profile_picture}
+                    alt={user.full_name}
+                    className="w-14 h-14 rounded-full object-cover ring-2 ring-slate-100"
+                  />
+                  <div>
+                    <p className="font-semibold text-slate-800">
+                      {user.full_name}
+                    </p>
+                    <p className="text-sm text-slate-500">@{user.username}</p>
                   </div>
+                </div>
+
+                <p className="text-sm text-slate-600 mt-3 line-clamp-2">
+                  {user.bio || "No bio available"}
+                </p>
+
+                <div className="flex flex-wrap gap-2 mt-5">
+                  <button
+                    onClick={() => navigate(`/profile/${user._id}`)}
+                    className="flex-1 py-2 rounded-lg bg-slate-900 text-white text-sm hover:bg-slate-800 transition"
+                  >
+                    View Profile
+                  </button>
+
+                  {currentTab === "Following" && (
+                    <button
+                      onClick={() => handleUnfollow(user._id)}
+                      className="flex-1 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm hover:bg-slate-200 transition"
+                    >
+                      Unfollow
+                    </button>
+                  )}
+
+                  {currentTab === "Pending" && (
+                    <button
+                      onClick={() => acceptConnection(user._id)}
+                      disabled={acceptLoading[user._id]}
+                      className="flex-1 py-2 rounded-lg bg-indigo-600 text-white text-sm hover:bg-indigo-700 transition disabled:opacity-50"
+                    >
+                      {acceptLoading[user._id] ? "Accepting..." : "Accept"}
+                    </button>
+                  )}
+
+                  {currentTab === "Connections" && (
+                    <button
+                      onClick={() => navigate(`/messages/${user._id}`)}
+                      className="flex-1 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm hover:bg-slate-200 transition flex items-center justify-center gap-1"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      Message
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
         </div>
+
+        {/* Empty State */}
+        {dataArray.find((i) => i.label === currentTab)?.value.length === 0 && (
+          <div className="text-center py-20">
+            <Users className="w-12 h-12 mx-auto text-slate-300" />
+            <p className="text-slate-500 mt-3">
+              No users found in this section
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

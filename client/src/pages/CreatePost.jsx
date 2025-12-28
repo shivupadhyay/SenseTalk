@@ -129,12 +129,16 @@ const CreatePost = () => {
               disabled={loading}
               onClick={() =>
                 toast.promise(handleSubmit(), {
-                  loading: "uploading...",
+                  loading: "Uploading...",
                   success: <p>Post Added</p>,
                   error: <p>Post Not Added</p>,
                 })
               }
-              className="text-sm bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 active:scale-95 transition text-white font-medium px-8 py-2 rounded-md cursor-pointer"
+              className="px-8 py-2.5 rounded-xl text-sm font-medium text-white
+  bg-slate-900 hover:bg-slate-800
+  active:scale-95 transition
+  disabled:opacity-50 disabled:cursor-not-allowed
+  shadow-sm hover:shadow-md"
             >
               Publish Post
             </button>
