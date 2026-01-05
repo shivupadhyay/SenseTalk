@@ -11,15 +11,42 @@ import { fetchUser } from "../features/user/userSlice";
 
 const Discover = () => {
   const dispatch = useDispatch();
-  const [input, setInput] = useState([]);
+  const [input, setInput] = useState("");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const { getToken } = useAuth();
 
-  const handleSearch = async (e) => {
-    if (e.key === "Enter") {
+  // const handleSearch = async (e) => {
+  //   if (e.key === "Enter") {
+  //     try {
+  //       setUsers([]);
+  //       setLoading(true);
+  //       const { data } = await api.post(
+  //         "/api/user/discover",
+  //         { input },
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${await getToken()}`,
+  //           },
+  //         }
+  //       );
+  //       data.success ? setUsers(data.users) : toast.error(data.message);
+  //       setLoading(false);
+  //       setInput("");
+  //     } catch (error) {
+  //       toast.error(error.message);
+  //     }
+  //     setLoading(false);
+  //   }
+  // };
+  useEffect(() => {
+    if (!input.trim()) {
+      setUsers([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
       try {
-        setUsers([]);
         setLoading(true);
         const { data } = await api.post(
           "/api/user/discover",
@@ -30,17 +57,20 @@ const Discover = () => {
             },
           }
         );
+
         data.success ? setUsers(data.users) : toast.error(data.message);
-        setLoading(false);
-        setInput("");
       } catch (error) {
-        toast.error(error.message);
+        toast.error("Search failed");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    }
-  };
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [input]);
   useEffect(() => {
-    getToken().then((token) => {dispatch(fetchUser(token))});
+    getToken().then((token) => {
+      dispatch(fetchUser(token));
+    });
   }, []);
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
@@ -65,7 +95,6 @@ const Discover = () => {
                 className="pl-10 sm:pl-12 py-2 w-full border border-gray-300 rounded-md max-sm:text-sm"
                 onChange={(e) => setInput(e.target.value)}
                 value={input}
-                onKeyUp={handleSearch}
               />
             </div>
           </div>
